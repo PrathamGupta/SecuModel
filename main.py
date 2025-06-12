@@ -1,46 +1,36 @@
 #!/usr/bin/env python3
-"""
-SecuModel - Simple Threat Modeling Tool
-Basic demonstration of core functionality
-"""
-
 from src.models.component import Component, ComponentType
-from src.models.threat import Threat, ThreatCategory, Severity
+from src.engines.threat_engine import ThreatEngine
 
 def main():
-    print("SecuModel - Threat Modeling Tool")
-    print("=" * 40)
+    print("SecuModel - Automated Threat Detection")
+    print("=" * 45)
     
-    # Create a simple component
-    web_server = Component(
-        id="web_01",
-        type=ComponentType.PROCESS,
-        name="Web Server",
-        description="Apache web server handling user requests"
-    )
+    # Create threat engine
+    engine = ThreatEngine()
     
-    # Create a basic threat
-    threat = Threat(
-        id="threat_01",
-        title="SQL Injection",
-        description="Attacker may inject malicious SQL code",
-        category=ThreatCategory.T,  # Tampering
-        severity=Severity.HIGH,
-        affected_elements=[web_server.id]
-    )
+    # Create components
+    components = [
+        Component(id="web_01", type=ComponentType.PROCESS, name="Web Server"),
+        Component(id="db_01", type=ComponentType.DATASTORE, name="User Database"),
+        Component(id="api_01", type=ComponentType.PROCESS, name="API Gateway")
+    ]
     
-    web_server.threats.append(threat)
+    # Analyze each component
+    for component in components:
+        threats = engine.analyze_component(component)
+        component.threats = threats
+        
+        print(f"\n{component.name} ({component.type.value})")
+        if threats:
+            print(" Threats detected:")
+            for threat in threats:
+                print(f"    • {threat.title} [{threat.severity.value}]")
+        else:
+            print("No threats detected")
     
-    # Display results
-    print(f"Component: {web_server.name}")
-    print(f"Type: {web_server.type.value}")
-    print(f"Description: {web_server.description}")
-    print(f"\nIdentified Threats:")
-    for threat in web_server.threats:
-        print(f"  - {threat.title} ({threat.severity.value})")
-        print(f"    {threat.description}")
-    
-    print(f"\nSecuModel basic functionality working!")
+    total_threats = sum(len(c.threats) for c in components)
+    print(f"\nAnalysis complete: {total_threats} threats identified across {len(components)} components")
 
 if __name__ == "__main__":
     main()
